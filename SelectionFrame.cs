@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -47,7 +52,7 @@ namespace PrintScreen
             }
             else
             {
-                captured.Dispose();
+                captured?.Dispose();
                 captured = null;
             }
         }
@@ -78,8 +83,12 @@ namespace PrintScreen
             }
             else if (e.Button == MouseButtons.Right)
             {
-                startPoint = null;
-                Invalidate();
+                if (startPoint != null)
+                {
+                    startPoint = null;
+                    Invalidate();
+                }
+                else Close();
             }
         }
 
@@ -142,7 +151,12 @@ namespace PrintScreen
             {
                 using (var g = Graphics.FromImage(bitmap))
                     g.DrawImage(captured, 0, 0, rectangle, GraphicsUnit.Pixel);
-                Clipboard.SetImage(bitmap);
+
+                var filename = $"{DateTime.Now.ToString("yyyy-MM-dd hh-mm-ss")}.png";
+                var filepath = Path.Combine(ConfigurationManager.AppSettings["dropFilesPath"], filename);
+                bitmap.Save(filepath, ImageFormat.Png);
+
+                Clipboard.SetFileDropList(new StringCollection { filepath });
             }
         }
     }
