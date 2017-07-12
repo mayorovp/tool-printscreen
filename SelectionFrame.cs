@@ -88,7 +88,7 @@ namespace PrintScreen
                     startPoint = null;
                     Invalidate();
                 }
-                else Close();
+                else Hide();
             }
         }
 
